@@ -1,0 +1,201 @@
+﻿@model TaskManagmentSystem.ViewModels.TaskDetailViewModel
+<p class="my-3">
+    <button id="goToTask" class="btn btn-link d-flex align-items-center">
+        <svg id="Layer_1" style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="18px" heigth="18px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256 " /></svg>
+        Back
+    </button>
+</p>
+
+<div class="modal fade" id="editTask" tabindex="-1" role="dialog" aria-labelledby="editTask" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTask">Update Task</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="mt-2 pt-2" asp-controller="TaskManagement" asp-action="UpdateUserTask" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" asp-for="@Model.TaskId" name="TaskId" />
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input required type="text" class="form-control" id="input-title" asp-for="@Model.Title" name="Title" placeholder="Enter Title" autocomplete="off">
+                        <label for="input-title">Title</label>
+                    </div>
+
+                    <div class="form-floating form-floating-custom mb-4">
+                        <textarea required type="text" class="form-control" id="input-description" name="Description" asp-for="@Model.Description" placeholder="Enter Description" autocomplete="off"></textarea>
+                        <label for="input-description">Description</label>
+                    </div>
+
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input required type="date" id="duedate" class="form-control" asp-for="@Model.DueDate" name="DueDate" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        <label for="duedate">Due Date</label>
+                    </div>
+
+                    <div class="form-floating form-floating-custom mb-4">
+                        <select required id="teams" class="form-control" name="AssignedTo" asp-for="AssignedTo" asp-items="@(new SelectList(Model.TeamMembers, "UserId", "UserName"))">
+                            <option value="" disabled>Select TeamMate</option>
+                        </select>
+                        <label for="teams">Assign To</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-secondary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadAttachment" tabindex="-1" role="dialog" aria-labelledby="uploadAttachment" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadAttachment">Add Attachments</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="mt-2 pt-2" asp-controller="TaskManagement" asp-action="AddNewAttachments" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" asp-for="@Model.TaskId" name="TaskId" />
+                    <label for="file" class="control-label">Select Attachment</label>
+                    <input type="file" class="form-control" name="file" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="detail-page">
+    <h2>Details Page</h2>
+    <div class="details">
+        <h3>Title: @Model.Title</h3>
+        <p>Description:@Model.Description</p>
+    </div>
+
+    <div class="row align-items-center mb-3">
+        <div class="text-end">
+            <div class="dropdown">
+                <button class="btn btn-primary dropbtn">@Model.Status</button>
+                <div class="dropdown-content">
+                    @foreach (var status in Model.StatusList)
+                    {
+                        if (status != Model.Status)
+                        {
+                            <p class="m-0" onclick="selectStatus('@status')">@status</p>
+                        }
+                    }
+                </div>
+            </div>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#editTask">Edit Task</button>
+            <button class="btn btn-outline-dark" data-toggle="modal" data-target="#uploadAttachment">Add Attachments</button>
+        </div>
+
+    </div>
+    <div class="mb-5">
+        <div class="accordion-item mb-2">
+            <button class="accordion-button btn" onclick="toggleAccordion('attachments')">Attachments</button>
+            <div id="attachments" class="accordion-content">
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="gap-3">
+                            <th>File Name</th>
+                            <th>File Type</th>
+                            <th>Author</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attachments in Model.Attachments)
+                        {
+                            <tr class="gap-2">
+                                <td class="col-3">
+                                    @attachments.FileName
+                                </td>
+                                <td class="col-6">
+                                    @attachments.DocType
+                                </td>
+                                <td class="col">
+                                    @attachments.UploadedUser
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-button btn" onclick="toggleAccordion('notes')">Notes</button>
+            <div id="notes" class="accordion-content">
+                @foreach (var note in Model.Notes)
+                {
+                    <div class="note">
+                        <p class="note-content">
+                            @note.NoteText
+                        </p>
+                        <p class="note-author">Written by: @note.CreatedUser</p>
+                    </div>
+                    <hr class="m-0" />
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="add-note">
+        <form asp-action="AddTaskNotes" asp-controller="TaskManagement" method="post">
+            <input type="hidden" asp-for="@Model.TaskId" name="TaskId" />
+            <h3>Add a Note</h3>
+            <textarea id="newNote" rows="4" cols="50" name="NoteText"></textarea>
+            <button class="btn btn-primary" type="submit">Add Note</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("goToTask").onclick = function () {
+        if ('@Model.UserRole' == "CompanyAdmin") {
+            window.location.href = '@Url.Action("AdminView", "TaskManagement")';
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "TaskManagement")';
+        }
+    };
+
+    function toggleAccordion(id) {
+        console.log("toggle");
+        var content = document.getElementById(id);
+        var button = content.previousElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            button.classList.remove('active');
+        } else {
+            content.style.display = "block";
+            button.classList.add('active');
+        }
+    }
+
+    function selectStatus(status) {
+        var taskId = '@Model.TaskId';
+
+        $.ajax({
+            url: '@Url.Action("TaskUpdateStatus", "TaskManagement")',
+            type: 'POST',
+            data: {
+                TaskId: taskId,
+                Status: status
+            },
+            success: function (response) {
+                location.reload();
+            },
+            error: function (xhr, status) {
+                alert('Error updating status');
+            }
+        });
+    }
+</script>

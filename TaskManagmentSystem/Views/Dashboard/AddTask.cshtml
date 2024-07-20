@@ -1,0 +1,101 @@
+﻿@model TaskManagmentSystem.ViewModels.TeamViewModel
+
+<div class="row">
+    <p class="my-3">
+        <button id="goToTask" class="btn btn-link d-flex align-items-center">
+            <svg id="Layer_1" style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="18px" heigth="18px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256 " /></svg>
+            Back
+        </button>
+    </p>
+
+    <div class="d-flex justify-content-center mt-5">
+        <div class="card mb-0 w-50">
+            <div class="card-body">
+                <div class="auth-full-page-content rounded d-flex p-3 my-2">
+                    <div class="w-100">
+                        <div class="d-flex flex-column h-100">
+                            <div class="auth-content my-auto">
+                                <div class="text-center">
+                                    <h5 class="mb-0">Create a Task</h5>
+                                </div>
+                                <form class="mt-4 pt-2" asp-controller="TaskManagement" asp-action="AddTask" enctype="multipart/form-data">
+                                    <div class="form-floating form-floating-custom mb-4">
+                                        <input required type="text" class="form-control" id="input-title" name="Title" placeholder="Enter Title" autocomplete="off">
+                                        <label for="input-title">Title</label>
+                                    </div>
+
+                                    <div class="form-floating form-floating-custom mb-4">
+                                        <textarea required type="text" class="form-control" id="input-description" name="Description" placeholder="Enter Description" autocomplete="off"></textarea>
+                                        <label for="input-description">Description</label>
+                                    </div>
+
+                                    <div class="form-floating form-floating-custom mb-4">
+                                        <select required id="teams" class="form-control" name="TeamId" asp-for="SelectedTeamId" asp-items="@(new SelectList(Model.Teams, "TeamId", "TeamName"))">
+                                            <option value="">Select Team</option>
+                                        </select>
+                                        <label for="teams">Team</label>
+                                    </div>
+
+                                    <div class="form-floating form-floating-custom mb-4">
+                                        <select required id="teamMembers" name="AssignedTo" class="form-control">
+                                            <option value="">Select Team Member</option>
+                                            @foreach (var member in Model.TeamMembers)
+                                            {
+                                                <option value="@member.UserId">@member.UserName</option>
+                                            }
+                                        </select>
+                                        <label for="teamMembers">Team Member</label>
+                                    </div>
+
+                                    <div class="form-floating form-floating-custom mb-4">
+                                        <input required type="date" id="duedate" class="form-control" name="DueDate" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                        <label for="duedate">Due Date</label>
+                                    </div>
+
+                                    <div class= "mb-4">
+                                        <label for="file" class="control-label">Select Attachment</label>
+                                        <input type="file" class="form-control" name="file" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <button class="btn btn-primary w-100 waves-effect waves-light" type="submit">Add Task</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("goToTask").onclick = function () {
+        if ('@Model.UserRole' == "CompanyAdmin") {
+            window.location.href = '@Url.Action("AdminView", "TaskManagement")';
+        }
+        else {
+            window.location.href = '@Url.Action("Index", "TaskManagement")';
+        }
+    };
+    $(document).ready(function () {
+        $('#teams').change(function () {
+            var teamId = $(this).val();
+            $.ajax({
+                url: '@Url.Action("GetTeamMembers", "TaskManagement")',
+                type: 'GET',
+                data: { teamId: teamId },
+                success: function (data) {
+                    var teamMembersDropdown = $('#teamMembers');
+                    teamMembersDropdown.empty();
+                    teamMembersDropdown.append('<option value="">Select Team Member</option>');
+                    $.each(data, function (index, member) {
+                        teamMembersDropdown.append('<option value="' + member.userId + '">' + member.userName + '</option>');
+                    });
+                }
+            });
+        });
+    });
+
+</script>

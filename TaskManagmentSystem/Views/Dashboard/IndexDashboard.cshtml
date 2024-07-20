@@ -1,0 +1,191 @@
+﻿@model TaskManagmentSystem.ViewModels.TaskListViewModel
+
+<div class="float-end col-1 text-end mt-4">
+    <a href="#" id="logout" class="btn btn-dark">Logout</a>
+</div>
+<br />
+<div class="modal fade" id="addTeam" tabindex="-1" role="dialog" aria-labelledby="addTeam" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTeam">Add Team</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <form class="mt-2 p-4" asp-controller="TaskManagement" asp-action="AddTeam" enctype="multipart/form-data">
+                <div class="form-floating form-floating-custom mb-4">
+                    <input required type="text" class="form-control" id="input-title" name="teamName" placeholder="Enter Team Name" autocomplete="off">
+                    <label for="input-title">Team Name</label>
+                </div>
+                <div class="mb-3">
+                    <label>Select Team Member</label>
+                    <div>
+                        @foreach (var item in Model.Members)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="SelectedMemberIds" value="@item.UserId" id="option_@item.UserId"/>
+                                <label class="form-check-label" for="option_@item.UserId">
+                                    @item.Username
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="teamsubmit" class="btn btn-secondary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addMember" tabindex="-1" role="dialog" aria-labelledby="addMember" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMember">Add Member</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                    
+                </button>
+            </div>
+            <form class="mt-2 pt-2" asp-controller="TaskManagement" asp-action="AddMemberInTeam" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-floating form-floating-custom mb-4">
+                        <select required id="teams" class="form-control" name="TeamId" asp-items="@(new SelectList(Model.Teams, "TeamId", "TeamName"))">
+                            <option value="">Select Team</option>
+                        </select>
+                        <label for="teams">Team</label>
+                    </div>
+                    <div class="mb-3">
+                        <div id="teamMembersContainer">
+                            <!-- Team members checkboxes will be added here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-secondary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-6 d-flex align-items-center">
+        <h2>Welcome User</h2>
+    </div>
+    <div class="dropdown col-6 text-end d-flex flex-row-reverse align-items-center">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Action
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+            <button id="goToAddTask" class="btn btn-outline-secondary dropdown-item mx-1">Create Task ✏</button>
+            <button id="goToAddMember" class="btn btn-secondary dropdown-item mx-1" data-toggle="modal" data-target="#addMember">Add Members ➕</button>
+            <button id="goToAddTeam" class="btn btn-secondary dropdown-item mx-1" data-toggle="modal" data-target="#addTeam">Add Team ➕</button>
+        </div>
+    </div>
+</div>
+<h4 class="mt-4">
+    My Tasks (@Model.AssignedToMe.Count)    <button id="goToAddTask2" class="btn mx-1" title="Add Task">➕</button>
+</h4>
+<div class="row px-2 my-3 card-gap alert-success" style="border:solid 2px black;">
+    @foreach (var task in Model.AssignedToMe)
+    {
+        <div class="card border-1 rounded-1 shadow shadow-light dashboard-card my-4 " data-id=@task.TaskId onclick="redirectToDetails(@task.TaskId)">
+            <div class="card-body px-2 py-3">
+                <div class="d-flex align-items-start border-bottom pb-3">
+                    <div class="flex-grow-1 align-self-center overflow-hidden">
+                        <span class="d-flex justify-content-evenly">
+                            <p class="col-6 mb-0 mt-2 text-secondary badge badge-primary d-flex">@task.Status</p>
+                            <p class="col-6 mb-0 mt-2 text-secondary badge badge-primary d-flex">Due : @task.DueDate.ToString("dd/MMM/yy")</p>
+                        </span>
+                        <hr />
+                        <p class="mb-0 mt-2 text-black"><b>Task ID : </b>@task.TaskId</p>
+                        <p class="mb-0 mt-2 text-black"><b>Title :</b> @task.Title</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 align-self-center overflow-hidden mt-2">
+                        <p class="mb-0 mt-2 text-black"><b>Assigned To :</b> @task.AssignedUser</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h4 class="mt-4">Team Members Task (@Model.TeamMatesTasks.Count)
+    <button id="goToAddTask3" class="btn mx-1" title="Add Task">➕</button>
+</h4>
+
+<div class="row px-2 my-3 card-gap alert-success" style="border:solid 2px black;">
+    @foreach (var task in Model.TeamMatesTasks)
+    {
+        <div class="card border-1 rounded-1 shadow dashboard-card my-4" style="border:thin 1px grey;" data-id=@task.TaskId onclick="redirectToDetails(@task.TaskId)">
+            <div class="card-body px-2 py-3">
+                <div class="d-flex align-items-start border-bottom pb-3">
+                    <div class="flex-grow-1 align-self-center overflow-hidden">
+                        <span class="d-flex justify-content-evenly">
+                            <p class="col-6 mb-0 mt-2 text-secondary badge badge-primary d-flex">@task.Status</p>
+                            <p class="col-6 mb-0 mt-2 text-secondary badge badge-primary d-flex">Due : @task.DueDate.ToString("dd/MMM/yy")</p>
+                        </span>
+                        <hr />
+                        <p class="mb-0 mt-2 text-black"><b>Task ID : </b>@task.TaskId</p>
+                        <p class="mb-0 mt-2 text-black"><b>Title :</b> @task.Title</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 align-self-center overflow-hidden mt-2">
+                        <p class="mb-0 mt-2 text-black"><b>Assigned To :</b> @task.AssignedUser</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.getElementById("goToAddTask").onclick = function () {
+        window.location.href = '@Url.Action("GenerateTask", "TaskManagement")';
+    };
+    document.getElementById("goToAddTask2").onclick = function () {
+        window.location.href = '@Url.Action("GenerateTask", "TaskManagement")';
+    }; document.getElementById("goToAddTask3").onclick = function () {
+        window.location.href = '@Url.Action("GenerateTask", "TaskManagement")';
+    };
+
+    document.getElementById("logout").onclick = function () {
+        window.location.href = '@Url.Action("LogOut", "Auth")';
+    };
+
+    function redirectToDetails(id) {
+        window.location.href = '@Url.Action("TaskDetailView", "TaskManagement", new { id = "__id__" })'.replace("__id__", id);
+    }
+
+    $(document).ready(function () {
+        $('#teams').change(function () {
+            var teamId = $(this).val();
+
+            $.ajax({
+                url: '@Url.Action("GetNewMember", "TaskManagement")',
+                type: 'GET',
+                data: { teamId: teamId },
+                success: function (data) {
+                    var teamMembersContainer = $('#teamMembersContainer');
+                    teamMembersContainer.empty();
+                    $.each(data, function (index, member) {
+                        var checkboxHtml = '<div class="form-check">';
+                        checkboxHtml += '<input class="form-check-input" type="checkbox" name="SelectedMemberIds" value="' + member.userId + '" id="checkbox_' + member.userId + '">';
+                        checkboxHtml += '<label class="form-check-label" for="checkbox_' + member.userId + '">' + member.username + '</label>';
+                        checkboxHtml += '</div>';
+
+                        teamMembersContainer.append(checkboxHtml);
+                    });
+                }
+            });
+        });
+    });
+
+</script>

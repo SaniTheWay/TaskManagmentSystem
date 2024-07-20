@@ -1,0 +1,51 @@
+﻿<div class="d-flex justify-content-center mt-5">
+    <div class="card mb-0 w-50">
+        <div class="mt-4 pt-3 text-center d-flex card-body align-items-center justify-content-center" style="height:38rem;">
+            <p class="text-muted mb-0">
+                Don't have an account? &nbsp;<a href="@Url.Action("Register", "Auth")"
+                                                class="text-primary fw-semibold">
+                    <h4>Signup</h4>
+                </a>
+            </p>
+        </div>
+    </div>
+    <div class="card mb-0 w-50">
+        <div class="card-body" style="height:38rem;">
+            <div class="auth-full-page-content rounded d-flex p-3 my-2">
+                <div class="w-100">
+                    <div class="d-flex flex-column h-100">
+                        <div class="auth-content my-auto">
+                            <div class="text-center">
+                                <h5 class="mb-0">Login</h5>
+                                <p class="text-muted mt-2">Task Management System User Sign In</p>
+                            </div>
+                            <hr />
+                            <form class="mt-4 pt-2" asp-controller="Auth" asp-action="UserAuthentication">
+                                <div class="form-floating form-floating-custom mb-4">
+                                    <input required type="text" class="form-control" id="input-username" name="userName" placeholder="Enter User Name" autocomplete="off">
+                                    <label for="input-username">Username</label>
+                                </div>
+
+                                <div class="form-floating form-floating-custom mb-4 auth-pass-inputgroup">
+                                    <input required type="password" class="form-control pe-5" id="password-input" name="password" placeholder="Enter Password" autocomplete="off">
+
+                                    <label for="password-input">Password</label>
+                                </div>
+
+                                <div class="mb-3 pt-5">
+                                    <button class="btn btn-success w-100 waves-effect waves-light" type="submit">Log In</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 pt-3 text-center card-footer">
+            <p class="text-muted mb-0">
+                New to TMS? <a href="@Url.Action("Login", "Auth")"
+                                    class="text-primary fw-semibold"> Register </a>
+            </p>
+        </div>
+    </div>
+</div>
